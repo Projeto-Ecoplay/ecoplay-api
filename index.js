@@ -2,12 +2,17 @@ require('dotenv').config();
 
 const express = require('express');
 const { sequelize } = require('./config/database');
+const models = require('./models');
 const { supabase } = require('./lib/supabase');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
+
+if (models.sequelize) {
+  app.use('/api', require('./routes'));
+}
 
 app.get('/', (req, res) => {
   res.json({
