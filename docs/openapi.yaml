@@ -1,0 +1,1132 @@
+openapi: 3.0.3
+info:
+  title: Ecoplay API
+  description: |
+    API REST da Ecoplay. Base JSON: `/api`.
+
+    **Autenticação:** `POST /api/auth/login` devolve `token`. Nas restantes rotas (exceto login e registo) envia o header `Authorization: Bearer <token>`.
+
+    **Registo:** `POST /api/usuarios` (público).
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local — em produção, usa "Try it out" com o URL público do teu serviço (ex. Render)
+
+tags:
+  - name: Raiz e saúde
+    description: Endpoints fora do prefixo /api ou utilitários
+  - name: Auth
+    description: Login e sessão JWT
+  - name: Usuários
+  - name: Missões
+  - name: Utilizador — missões
+  - name: Doações
+  - name: Itens
+  - name: Utilizador — itens
+  - name: Avatares
+  - name: Utilizador — avatares
+  - name: Amizades
+
+paths:
+  /:
+    get:
+      tags: [Raiz e saúde]
+      summary: Informação da API
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  message: { type: string }
+
+  /health:
+    get:
+      tags: [Raiz e saúde]
+      summary: Estado do serviço (Postgres / Supabase)
+      responses:
+        "200":
+          description: Serviço considerado saudável
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: Algum check falhou
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /api/supabase-ready:
+    get:
+      tags: [Raiz e saúde]
+      summary: Verifica se o cliente Supabase pode ser inicializado
+      responses:
+        "200":
+          description: OK
+        "503":
+          description: Variáveis em falta
+        "500":
+          description: Erro
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login (obtém JWT)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            example:
+              email: user@exemplo.com
+              senha: "secret"
+      responses:
+        "200":
+          description: Token + dados do utilizador (sem senha)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Pedido inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "401":
+          description: Credenciais inválidas
+        "503":
+          description: JWT não configurado no servidor
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Perfil do utilizador autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Usuario"
+        "401":
+          description: Token em falta ou inválido
+        "404":
+          description: Utilizador não encontrado
+
+  /api/usuarios:
+    get:
+      tags: [Usuários]
+      summary: Listar utilizadores
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Usuario"
+    post:
+      tags: [Usuários]
+      summary: Registar utilizador (público)
+      description: A senha é armazenada com hash (bcrypt).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioCreate"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Usuario"
+        "400":
+          description: Validação
+        "409":
+          description: Email já registado
+
+  /api/usuarios/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [Usuários]
+      summary: Obter utilizador com relações
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Usuario"
+        "404":
+          description: Não encontrado
+    put:
+      tags: [Usuários]
+      summary: Atualizar utilizador (substituição)
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Usuario"
+        "404":
+          description: Não encontrado
+    patch:
+      tags: [Usuários]
+      summary: Atualizar utilizador (parcial)
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Usuario"
+    delete:
+      tags: [Usuários]
+      summary: Eliminar utilizador e dados associados
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Sem conteúdo
+        "404":
+          description: Não encontrado
+
+  /api/missoes:
+    get:
+      tags: [Missões]
+      security:
+        - bearerAuth: []
+      summary: Listar missões
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Missao"
+    post:
+      tags: [Missões]
+      security:
+        - bearerAuth: []
+      summary: Criar missão
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MissaoInput"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Missao"
+
+  /api/missoes/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Missões]
+      security:
+        - bearerAuth: []
+      summary: Obter missão
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Missao"
+        "404":
+          description: Não encontrado
+    put:
+      tags: [Missões]
+      security:
+        - bearerAuth: []
+      summary: Atualizar missão
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MissaoInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Missao"
+    patch:
+      tags: [Missões]
+      security:
+        - bearerAuth: []
+      summary: Atualizar missão (parcial)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MissaoInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Missao"
+    delete:
+      tags: [Missões]
+      security:
+        - bearerAuth: []
+      summary: Eliminar missão
+      responses:
+        "204":
+          description: Sem conteúdo
+        "404":
+          description: Não encontrado
+
+  /api/usuario-missoes:
+    get:
+      tags: [Utilizador — missões]
+      security:
+        - bearerAuth: []
+      summary: Listar associações utilizador–missão
+      parameters:
+        - name: usuario_id
+          in: query
+          schema:
+            type: integer
+        - name: missao_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UsuarioMissao"
+    post:
+      tags: [Utilizador — missões]
+      security:
+        - bearerAuth: []
+      summary: Associar utilizador a uma missão
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioMissaoCreate"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioMissao"
+
+  /api/usuario-missoes/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Utilizador — missões]
+      security:
+        - bearerAuth: []
+      summary: Obter registo
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioMissao"
+    put:
+      tags: [Utilizador — missões]
+      security:
+        - bearerAuth: []
+      summary: Atualizar (ex. status, data_conclusao)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioMissaoUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioMissao"
+    patch:
+      tags: [Utilizador — missões]
+      security:
+        - bearerAuth: []
+      summary: Atualizar parcial
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioMissaoUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioMissao"
+    delete:
+      tags: [Utilizador — missões]
+      security:
+        - bearerAuth: []
+      summary: Remover associação
+      responses:
+        "204":
+          description: Sem conteúdo
+
+  /api/doacoes:
+    get:
+      tags: [Doações]
+      security:
+        - bearerAuth: []
+      summary: Listar doações
+      parameters:
+        - name: usuario_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Doacao"
+    post:
+      tags: [Doações]
+      security:
+        - bearerAuth: []
+      summary: Criar doação
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DoacaoCreate"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Doacao"
+
+  /api/doacoes/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Doações]
+      security:
+        - bearerAuth: []
+      summary: Obter doação
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Doacao"
+    put:
+      tags: [Doações]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DoacaoCreate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Doacao"
+    patch:
+      tags: [Doações]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DoacaoCreate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Doacao"
+    delete:
+      tags: [Doações]
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Sem conteúdo
+
+  /api/itens:
+    get:
+      tags: [Itens]
+      security:
+        - bearerAuth: []
+      summary: Listar itens da loja
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Item"
+    post:
+      tags: [Itens]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemInput"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+
+  /api/itens/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Itens]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+    put:
+      tags: [Itens]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+    patch:
+      tags: [Itens]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+    delete:
+      tags: [Itens]
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Sem conteúdo
+
+  /api/usuario-itens:
+    get:
+      tags: [Utilizador — itens]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: usuario_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UsuarioItem"
+    post:
+      tags: [Utilizador — itens]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioItemCreate"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioItem"
+
+  /api/usuario-itens/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Utilizador — itens]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioItem"
+    delete:
+      tags: [Utilizador — itens]
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Sem conteúdo
+
+  /api/avatares:
+    get:
+      tags: [Avatares]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Avatar"
+    post:
+      tags: [Avatares]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AvatarInput"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Avatar"
+
+  /api/avatares/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Avatares]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Avatar"
+    put:
+      tags: [Avatares]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AvatarInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Avatar"
+    patch:
+      tags: [Avatares]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AvatarInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Avatar"
+    delete:
+      tags: [Avatares]
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Sem conteúdo
+
+  /api/usuario-avatares:
+    get:
+      tags: [Utilizador — avatares]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: usuario_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UsuarioAvatar"
+    post:
+      tags: [Utilizador — avatares]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioAvatarCreate"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioAvatar"
+
+  /api/usuario-avatares/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Utilizador — avatares]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioAvatar"
+    put:
+      tags: [Utilizador — avatares]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioAvatarUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioAvatar"
+    patch:
+      tags: [Utilizador — avatares]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioAvatarUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioAvatar"
+    delete:
+      tags: [Utilizador — avatares]
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Sem conteúdo
+
+  /api/usuario-avatares/{id}/ativar:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      tags: [Utilizador — avatares]
+      security:
+        - bearerAuth: []
+      summary: Definir este avatar como ativo (desativa os outros do utilizador)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioAvatar"
+
+  /api/amizades:
+    get:
+      tags: [Amizades]
+      security:
+        - bearerAuth: []
+      summary: Listar amizades de um utilizador
+      parameters:
+        - name: usuario_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Amizade"
+        "400":
+          description: usuario_id em falta
+    post:
+      tags: [Amizades]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AmizadeCreate"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Amizade"
+
+  /api/amizades/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Amizades]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Amizade"
+    delete:
+      tags: [Amizades]
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Sem conteúdo
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Obtido em POST /api/auth/login (campo `token`).
+
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+
+  schemas:
+    ErrorMessage:
+      type: object
+      properties:
+        error:
+          type: string
+
+    HealthResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        checks:
+          type: object
+          additionalProperties: true
+
+    LoginRequest:
+      type: object
+      required: [email, senha]
+      properties:
+        email:
+          type: string
+          format: email
+        senha:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        usuario:
+          $ref: "#/components/schemas/Usuario"
+
+    Usuario:
+      type: object
+      properties:
+        id: { type: integer }
+        nome: { type: string, nullable: true }
+        email: { type: string }
+        nivel: { type: integer }
+        pontos: { type: integer }
+        criado_em: { type: string, format: date-time, nullable: true }
+        atualizado_em: { type: string, format: date-time, nullable: true }
+
+    UsuarioCreate:
+      type: object
+      required: [email, senha]
+      properties:
+        nome: { type: string }
+        email: { type: string, format: email }
+        senha: { type: string, format: password }
+        nivel: { type: integer }
+        pontos: { type: integer }
+
+    UsuarioUpdate:
+      type: object
+      properties:
+        nome: { type: string }
+        email: { type: string }
+        senha: { type: string, format: password, description: "Nova senha (será hasheada)" }
+        nivel: { type: integer }
+        pontos: { type: integer }
+
+    Missao:
+      type: object
+      properties:
+        id: { type: integer }
+        titulo: { type: string, nullable: true }
+        descricao: { type: string, nullable: true }
+        pontos_recompensa: { type: integer }
+        nivel_requerido: { type: integer }
+        criado_em: { type: string, format: date-time, nullable: true }
+
+    MissaoInput:
+      type: object
+      properties:
+        titulo: { type: string }
+        descricao: { type: string }
+        pontos_recompensa: { type: integer }
+        nivel_requerido: { type: integer }
+
+    UsuarioMissao:
+      type: object
+      properties:
+        id: { type: integer }
+        usuario_id: { type: integer }
+        missao_id: { type: integer }
+        status: { type: string, description: "ex. pending, completed" }
+        data_conclusao: { type: string, format: date-time, nullable: true }
+
+    UsuarioMissaoCreate:
+      type: object
+      required: [usuario_id, missao_id]
+      properties:
+        usuario_id: { type: integer }
+        missao_id: { type: integer }
+        status: { type: string }
+        data_conclusao: { type: string, format: date-time }
+
+    UsuarioMissaoUpdate:
+      type: object
+      properties:
+        status: { type: string }
+        data_conclusao: { type: string, format: date-time }
+
+    Doacao:
+      type: object
+      properties:
+        id: { type: integer }
+        usuario_id: { type: integer }
+        descricao: { type: string, nullable: true }
+        data: { type: string, format: date-time, nullable: true }
+
+    DoacaoCreate:
+      type: object
+      required: [usuario_id]
+      properties:
+        usuario_id: { type: integer }
+        descricao: { type: string }
+        data: { type: string, format: date-time }
+
+    Item:
+      type: object
+      properties:
+        id: { type: integer }
+        nome: { type: string, nullable: true }
+        descricao: { type: string, nullable: true }
+        custo_pontos: { type: integer }
+
+    ItemInput:
+      type: object
+      properties:
+        nome: { type: string }
+        descricao: { type: string }
+        custo_pontos: { type: integer }
+
+    UsuarioItem:
+      type: object
+      properties:
+        id: { type: integer }
+        usuario_id: { type: integer }
+        item_id: { type: integer }
+        data_aquisicao: { type: string, format: date-time, nullable: true }
+
+    UsuarioItemCreate:
+      type: object
+      required: [usuario_id, item_id]
+      properties:
+        usuario_id: { type: integer }
+        item_id: { type: integer }
+        data_aquisicao: { type: string, format: date-time }
+
+    Avatar:
+      type: object
+      properties:
+        id: { type: integer }
+        nome: { type: string, nullable: true }
+        url_imagem: { type: string, nullable: true }
+
+    AvatarInput:
+      type: object
+      properties:
+        nome: { type: string }
+        url_imagem: { type: string }
+
+    UsuarioAvatar:
+      type: object
+      properties:
+        id: { type: integer }
+        usuario_id: { type: integer }
+        avatar_id: { type: integer }
+        ativo: { type: boolean }
+
+    UsuarioAvatarCreate:
+      type: object
+      required: [usuario_id, avatar_id]
+      properties:
+        usuario_id: { type: integer }
+        avatar_id: { type: integer }
+        ativo: { type: boolean }
+
+    UsuarioAvatarUpdate:
+      type: object
+      properties:
+        ativo: { type: boolean, description: "Se true, ativa este registo e desativa os outros do mesmo utilizador" }
+
+    Amizade:
+      type: object
+      properties:
+        id: { type: integer }
+        usuario_id: { type: integer }
+        amigo_id: { type: integer }
+
+    AmizadeCreate:
+      type: object
+      required: [usuario_id, amigo_id]
+      properties:
+        usuario_id: { type: integer }
+        amigo_id: { type: integer }
