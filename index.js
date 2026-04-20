@@ -5,12 +5,24 @@ const fs = require('fs');
 const express = require('express');
 const yaml = require('js-yaml');
 const swaggerUi = require('swagger-ui-express');
+const corsMiddleware = require('./middleware/cors');
+const rateLimitMiddleware = require('./middleware/rateLimit');
+const helmetMiddleware = require('./middleware/helmet');
+const morganMiddleware = require('./middleware/morgan');
+const compressionMiddleware = require('./middleware/compression');
 const { sequelize } = require('./config/database');
 const models = require('./models');
 const { supabase } = require('./lib/supabase');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+
+// Middlewares de segurança e utilitários
+app.use(helmetMiddleware);
+app.use(corsMiddleware);
+app.use(compressionMiddleware);
+app.use(morganMiddleware);
+app.use(rateLimitMiddleware);
 
 app.use(express.json());
 
