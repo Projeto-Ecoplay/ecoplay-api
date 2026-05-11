@@ -8,6 +8,8 @@ const {
   UsuarioItem,
   UsuarioAvatar,
   Amizade,
+  UsuarioTitulo,
+  UsuarioConquista,
 } = require('../models');
 
 async function list(req, res) {
@@ -30,6 +32,8 @@ async function getById(req, res) {
         'doacoes',
         { association: 'usuario_itens', include: ['item'] },
         { association: 'usuario_avatares', include: ['avatar'] },
+        { association: 'usuario_titulos', include: ['titulo'] },
+        { association: 'usuario_conquistas', include: ['conquista'] },
       ],
     });
     if (!row) {
@@ -43,7 +47,7 @@ async function getById(req, res) {
 
 async function create(req, res) {
   try {
-    const { nome, email, senha, nivel, pontos } = req.body;
+    const { nome, email, senha, nivel, xp, pontos_total, pontos_semana, titulo_atual } = req.body;
     if (!email || !senha) {
       return res.status(400).json({ error: 'email e senha são obrigatórios' });
     }
@@ -53,7 +57,10 @@ async function create(req, res) {
       email,
       senha: senhaHash,
       nivel,
-      pontos,
+      xp,
+      pontos_total,
+      pontos_semana,
+      titulo_atual,
     });
     const safe = await Usuario.findByPk(row.id);
     res.status(201).json(safe);
@@ -72,12 +79,15 @@ async function update(req, res) {
     if (!row) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
-    const { nome, email, senha, nivel, pontos } = req.body;
+    const { nome, email, senha, nivel, xp, pontos_total, pontos_semana, titulo_atual } = req.body;
     const patch = {
       ...(nome !== undefined && { nome }),
       ...(email !== undefined && { email }),
       ...(nivel !== undefined && { nivel }),
-      ...(pontos !== undefined && { pontos }),
+      ...(xp !== undefined && { xp }),
+      ...(pontos_total !== undefined && { pontos_total }),
+      ...(pontos_semana !== undefined && { pontos_semana }),
+      ...(titulo_atual !== undefined && { titulo_atual }),
     };
     if (senha !== undefined && senha !== null && String(senha).length > 0) {
       patch.senha = await hashSenha(senha);
@@ -106,6 +116,8 @@ async function remove(req, res) {
     await Doacao.destroy({ where: { usuario_id: id }, transaction: t });
     await UsuarioItem.destroy({ where: { usuario_id: id }, transaction: t });
     await UsuarioAvatar.destroy({ where: { usuario_id: id }, transaction: t });
+    await UsuarioTitulo.destroy({ where: { usuario_id: id }, transaction: t });
+    await UsuarioConquista.destroy({ where: { usuario_id: id }, transaction: t });
     await Amizade.destroy({
       where: { [Op.or]: [{ usuario_id: id }, { amigo_id: id }] },
       transaction: t,

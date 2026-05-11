@@ -1,24 +1,26 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  const Item = sequelize.define(
-    'Item',
+  const Titulo = sequelize.define(
+    'Titulo',
     {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
       },
-      nome: DataTypes.STRING,
+      nome: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       descricao: DataTypes.TEXT,
-      custo_pontos: { type: DataTypes.INTEGER, defaultValue: 0 },
-      url_imagem: DataTypes.TEXT,
+      xp_necessario: { type: DataTypes.INTEGER, defaultValue: 0 },
     },
     {
-      tableName: 'itens',
+      tableName: 'titulos',
       timestamps: false,
     }
   );
 
-  return Item;
+  return Titulo;
 };

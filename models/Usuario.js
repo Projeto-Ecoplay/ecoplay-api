@@ -17,7 +17,10 @@ module.exports = (sequelize) => {
       },
       senha: DataTypes.STRING,
       nivel: { type: DataTypes.INTEGER, defaultValue: 1 },
-      pontos: { type: DataTypes.INTEGER, defaultValue: 0 },
+      xp: { type: DataTypes.INTEGER, defaultValue: 0 },
+      pontos_total: { type: DataTypes.INTEGER, defaultValue: 0 },
+      pontos_semana: { type: DataTypes.INTEGER, defaultValue: 0 },
+      titulo_atual: DataTypes.STRING,
     },
     {
       tableName: 'usuarios',

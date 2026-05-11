@@ -33,7 +33,7 @@ async function getById(req, res) {
 
 async function create(req, res) {
   try {
-    const { usuario_id, missao_id, status, data_conclusao } = req.body;
+    const { usuario_id, missao_id, progresso_atual, status, concluida_em } = req.body;
     if (!usuario_id || !missao_id) {
       return res
         .status(400)
@@ -42,8 +42,9 @@ async function create(req, res) {
     const row = await UsuarioMissao.create({
       usuario_id,
       missao_id,
+      progresso_atual: progresso_atual ?? 0,
       status,
-      data_conclusao,
+      concluida_em,
     });
     const full = await UsuarioMissao.findByPk(row.id, {
       include: ['usuario', 'missao'],
@@ -60,10 +61,11 @@ async function update(req, res) {
     if (!row) {
       return res.status(404).json({ error: 'Registo não encontrado' });
     }
-    const { status, data_conclusao } = req.body;
+    const { progresso_atual, status, concluida_em } = req.body;
     await row.update({
+      ...(progresso_atual !== undefined && { progresso_atual }),
       ...(status !== undefined && { status }),
-      ...(data_conclusao !== undefined && { data_conclusao }),
+      ...(concluida_em !== undefined && { concluida_em }),
     });
     const full = await UsuarioMissao.findByPk(row.id, {
       include: ['usuario', 'missao'],

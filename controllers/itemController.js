@@ -25,8 +25,8 @@ async function getById(req, res) {
 
 async function create(req, res) {
   try {
-    const { nome, descricao, custo_pontos } = req.body;
-    const row = await Item.create({ nome, descricao, custo_pontos });
+    const { nome, descricao, custo_pontos, url_imagem } = req.body;
+    const row = await Item.create({ nome, descricao, custo_pontos, url_imagem });
     res.status(201).json(row);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -39,11 +39,12 @@ async function update(req, res) {
     if (!row) {
       return res.status(404).json({ error: 'Item não encontrado' });
     }
-    const { nome, descricao, custo_pontos } = req.body;
+    const { nome, descricao, custo_pontos, url_imagem } = req.body;
     await row.update({
       ...(nome !== undefined && { nome }),
       ...(descricao !== undefined && { descricao }),
       ...(custo_pontos !== undefined && { custo_pontos }),
+      ...(url_imagem !== undefined && { url_imagem }),
     });
     res.json(row);
   } catch (e) {

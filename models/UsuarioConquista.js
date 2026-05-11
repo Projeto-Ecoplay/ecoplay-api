@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-  const UsuarioMissao = sequelize.define(
-    'UsuarioMissao',
+  const UsuarioConquista = sequelize.define(
+    'UsuarioConquista',
     {
       id: {
         type: DataTypes.INTEGER,
@@ -13,19 +13,17 @@ module.exports = (sequelize) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      missao_id: {
+      conquista_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      progresso_atual: { type: DataTypes.INTEGER, defaultValue: 0 },
-      status: { type: DataTypes.STRING, defaultValue: 'pending' },
-      concluida_em: DataTypes.DATE,
+      desbloqueada_em: DataTypes.DATE,
     },
     {
-      tableName: 'usuario_missoes',
+      tableName: 'usuario_conquistas',
       timestamps: false,
     }
   );
 
-  return UsuarioMissao;
+  return UsuarioConquista;
 };
