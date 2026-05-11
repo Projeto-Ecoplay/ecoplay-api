@@ -25,12 +25,15 @@ async function getById(req, res) {
 
 async function create(req, res) {
   try {
-    const { titulo, descricao, pontos_recompensa, nivel_requerido } = req.body;
+    const { titulo, descricao, nivel, xp_recompensa, pontos_recompensa, progresso_total, url_imagem } = req.body;
     const row = await Missao.create({
       titulo,
       descricao,
+      nivel,
+      xp_recompensa,
       pontos_recompensa,
-      nivel_requerido,
+      progresso_total,
+      url_imagem,
     });
     res.status(201).json(row);
   } catch (e) {
@@ -44,12 +47,15 @@ async function update(req, res) {
     if (!row) {
       return res.status(404).json({ error: 'Missão não encontrada' });
     }
-    const { titulo, descricao, pontos_recompensa, nivel_requerido } = req.body;
+    const { titulo, descricao, nivel, xp_recompensa, pontos_recompensa, progresso_total, url_imagem } = req.body;
     await row.update({
       ...(titulo !== undefined && { titulo }),
       ...(descricao !== undefined && { descricao }),
+      ...(nivel !== undefined && { nivel }),
+      ...(xp_recompensa !== undefined && { xp_recompensa }),
       ...(pontos_recompensa !== undefined && { pontos_recompensa }),
-      ...(nivel_requerido !== undefined && { nivel_requerido }),
+      ...(progresso_total !== undefined && { progresso_total }),
+      ...(url_imagem !== undefined && { url_imagem }),
     });
     res.json(row);
   } catch (e) {

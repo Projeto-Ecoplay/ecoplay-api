@@ -13,7 +13,12 @@ module.exports = (sequelize) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      instituicao_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
       descricao: DataTypes.TEXT,
+      quantidade: { type: DataTypes.INTEGER, defaultValue: 1 },
       data: DataTypes.DATE,
     },
     {

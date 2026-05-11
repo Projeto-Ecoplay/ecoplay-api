@@ -32,7 +32,7 @@ async function getById(req, res) {
 
 async function create(req, res) {
   try {
-    const { usuario_id, item_id, data_aquisicao } = req.body;
+    const { usuario_id, item_id, adquirido_em } = req.body;
     if (!usuario_id || !item_id) {
       return res
         .status(400)
@@ -41,7 +41,7 @@ async function create(req, res) {
     const row = await UsuarioItem.create({
       usuario_id,
       item_id,
-      data_aquisicao: data_aquisicao ?? new Date(),
+      adquirido_em: adquirido_em ?? new Date(),
     });
     const full = await UsuarioItem.findByPk(row.id, {
       include: ['usuario', 'item'],

@@ -17,7 +17,7 @@ module.exports = (sequelize) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      data_aquisicao: DataTypes.DATE,
+      adquirido_em: DataTypes.DATE,
     },
     {
       tableName: 'usuario_itens',
