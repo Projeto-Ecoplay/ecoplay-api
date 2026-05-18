@@ -8,6 +8,11 @@ const initUsuarioItem = require('./UsuarioItem');
 const initAvatar = require('./Avatar');
 const initUsuarioAvatar = require('./UsuarioAvatar');
 const initAmizade = require('./Amizade');
+const initInstituicao = require('./Instituicao');
+const initTitulo = require('./Titulo');
+const initUsuarioTitulo = require('./UsuarioTitulo');
+const initConquista = require('./Conquista');
+const initUsuarioConquista = require('./UsuarioConquista');
 
 if (!sequelize) {
   module.exports = {
@@ -21,6 +26,11 @@ if (!sequelize) {
     Avatar: null,
     UsuarioAvatar: null,
     Amizade: null,
+    Instituicao: null,
+    Titulo: null,
+    UsuarioTitulo: null,
+    Conquista: null,
+    UsuarioConquista: null,
   };
 } else {
   const Usuario = initUsuario(sequelize);
@@ -32,6 +42,11 @@ if (!sequelize) {
   const Avatar = initAvatar(sequelize);
   const UsuarioAvatar = initUsuarioAvatar(sequelize);
   const Amizade = initAmizade(sequelize);
+  const Instituicao = initInstituicao(sequelize);
+  const Titulo = initTitulo(sequelize);
+  const UsuarioTitulo = initUsuarioTitulo(sequelize);
+  const Conquista = initConquista(sequelize);
+  const UsuarioConquista = initUsuarioConquista(sequelize);
 
   Usuario.hasMany(UsuarioMissao, { foreignKey: 'usuario_id', as: 'usuario_missoes' });
   UsuarioMissao.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' });
@@ -51,6 +66,19 @@ if (!sequelize) {
   Avatar.hasMany(UsuarioAvatar, { foreignKey: 'avatar_id', as: 'usuario_avatares' });
   UsuarioAvatar.belongsTo(Avatar, { foreignKey: 'avatar_id', as: 'avatar' });
 
+  Usuario.hasMany(UsuarioTitulo, { foreignKey: 'usuario_id', as: 'usuario_titulos' });
+  UsuarioTitulo.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' });
+  Titulo.hasMany(UsuarioTitulo, { foreignKey: 'titulo_id', as: 'usuario_titulos' });
+  UsuarioTitulo.belongsTo(Titulo, { foreignKey: 'titulo_id', as: 'titulo' });
+
+  Usuario.hasMany(UsuarioConquista, { foreignKey: 'usuario_id', as: 'usuario_conquistas' });
+  UsuarioConquista.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' });
+  Conquista.hasMany(UsuarioConquista, { foreignKey: 'conquista_id', as: 'usuario_conquistas' });
+  UsuarioConquista.belongsTo(Conquista, { foreignKey: 'conquista_id', as: 'conquista' });
+
+  Instituicao.hasMany(Doacao, { foreignKey: 'instituicao_id', as: 'doacoes' });
+  Doacao.belongsTo(Instituicao, { foreignKey: 'instituicao_id', as: 'instituicao' });
+
   Usuario.hasMany(Amizade, { foreignKey: 'usuario_id', as: 'amizades_solicitadas' });
   Usuario.hasMany(Amizade, { foreignKey: 'amigo_id', as: 'amizades_recebidas' });
   Amizade.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'usuario' });
@@ -67,5 +95,10 @@ if (!sequelize) {
     Avatar,
     UsuarioAvatar,
     Amizade,
+    Instituicao,
+    Titulo,
+    UsuarioTitulo,
+    Conquista,
+    UsuarioConquista,
   };
 }

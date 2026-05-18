@@ -27,6 +27,11 @@ tags:
   - name: Avatares
   - name: Utilizador — avatares
   - name: Amizades
+  - name: Instituições
+  - name: Títulos
+  - name: Utilizador — títulos
+  - name: Conquistas
+  - name: Utilizador — conquistas
 
 paths:
   /:
@@ -913,6 +918,423 @@ paths:
         "204":
           description: Sem conteúdo
 
+  /api/instituicoes:
+    get:
+      tags: [Instituições]
+      security:
+        - bearerAuth: []
+      summary: Listar instituições
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Instituicao"
+    post:
+      tags: [Instituições]
+      security:
+        - bearerAuth: []
+      summary: Criar instituição
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstituicaoInput"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Instituicao"
+
+  /api/instituicoes/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Instituições]
+      security:
+        - bearerAuth: []
+      summary: Obter instituição
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Instituicao"
+        "404":
+          description: Não encontrado
+    put:
+      tags: [Instituições]
+      security:
+        - bearerAuth: []
+      summary: Atualizar instituição
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstituicaoInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Instituicao"
+    patch:
+      tags: [Instituições]
+      security:
+        - bearerAuth: []
+      summary: Atualizar instituição (parcial)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstituicaoInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Instituicao"
+    delete:
+      tags: [Instituições]
+      security:
+        - bearerAuth: []
+      summary: Eliminar instituição
+      responses:
+        "204":
+          description: Sem conteúdo
+        "404":
+          description: Não encontrado
+
+  /api/titulos:
+    get:
+      tags: [Títulos]
+      security:
+        - bearerAuth: []
+      summary: Listar títulos
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Titulo"
+    post:
+      tags: [Títulos]
+      security:
+        - bearerAuth: []
+      summary: Criar título
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TituloInput"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Titulo"
+
+  /api/titulos/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Títulos]
+      security:
+        - bearerAuth: []
+      summary: Obter título
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Titulo"
+        "404":
+          description: Não encontrado
+    put:
+      tags: [Títulos]
+      security:
+        - bearerAuth: []
+      summary: Atualizar título
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TituloInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Titulo"
+    patch:
+      tags: [Títulos]
+      security:
+        - bearerAuth: []
+      summary: Atualizar título (parcial)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TituloInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Titulo"
+    delete:
+      tags: [Títulos]
+      security:
+        - bearerAuth: []
+      summary: Eliminar título
+      responses:
+        "204":
+          description: Sem conteúdo
+        "404":
+          description: Não encontrado
+
+  /api/usuario-titulos:
+    get:
+      tags: [Utilizador — títulos]
+      security:
+        - bearerAuth: []
+      summary: Listar associações utilizador–título
+      parameters:
+        - name: usuario_id
+          in: query
+          schema:
+            type: integer
+        - name: titulo_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UsuarioTitulo"
+    post:
+      tags: [Utilizador — títulos]
+      security:
+        - bearerAuth: []
+      summary: Associar utilizador a um título
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioTituloCreate"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioTitulo"
+
+  /api/usuario-titulos/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Utilizador — títulos]
+      security:
+        - bearerAuth: []
+      summary: Obter registo
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioTitulo"
+    delete:
+      tags: [Utilizador — títulos]
+      security:
+        - bearerAuth: []
+      summary: Remover associação
+      responses:
+        "204":
+          description: Sem conteúdo
+
+  /api/conquistas:
+    get:
+      tags: [Conquistas]
+      security:
+        - bearerAuth: []
+      summary: Listar conquistas
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conquista"
+    post:
+      tags: [Conquistas]
+      security:
+        - bearerAuth: []
+      summary: Criar conquista
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConquistaInput"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conquista"
+
+  /api/conquistas/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Conquistas]
+      security:
+        - bearerAuth: []
+      summary: Obter conquista
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conquista"
+        "404":
+          description: Não encontrado
+    put:
+      tags: [Conquistas]
+      security:
+        - bearerAuth: []
+      summary: Atualizar conquista
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConquistaInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conquista"
+    patch:
+      tags: [Conquistas]
+      security:
+        - bearerAuth: []
+      summary: Atualizar conquista (parcial)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConquistaInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conquista"
+    delete:
+      tags: [Conquistas]
+      security:
+        - bearerAuth: []
+      summary: Eliminar conquista
+      responses:
+        "204":
+          description: Sem conteúdo
+        "404":
+          description: Não encontrado
+
+  /api/usuario-conquistas:
+    get:
+      tags: [Utilizador — conquistas]
+      security:
+        - bearerAuth: []
+      summary: Listar associações utilizador–conquista
+      parameters:
+        - name: usuario_id
+          in: query
+          schema:
+            type: integer
+        - name: conquista_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UsuarioConquista"
+    post:
+      tags: [Utilizador — conquistas]
+      security:
+        - bearerAuth: []
+      summary: Associar utilizador a uma conquista
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioConquistaCreate"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioConquista"
+
+  /api/usuario-conquistas/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Utilizador — conquistas]
+      security:
+        - bearerAuth: []
+      summary: Obter registo
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioConquista"
+    delete:
+      tags: [Utilizador — conquistas]
+      security:
+        - bearerAuth: []
+      summary: Remover associação
+      responses:
+        "204":
+          description: Sem conteúdo
+
 components:
   securitySchemes:
     bearerAuth:
@@ -971,7 +1393,10 @@ components:
         nome: { type: string, nullable: true }
         email: { type: string }
         nivel: { type: integer }
-        pontos: { type: integer }
+        xp: { type: integer }
+        pontos_total: { type: integer }
+        pontos_semana: { type: integer }
+        titulo_atual: { type: string, nullable: true }
         criado_em: { type: string, format: date-time, nullable: true }
         atualizado_em: { type: string, format: date-time, nullable: true }
 
@@ -983,7 +1408,10 @@ components:
         email: { type: string, format: email }
         senha: { type: string, format: password }
         nivel: { type: integer }
-        pontos: { type: integer }
+        xp: { type: integer }
+        pontos_total: { type: integer }
+        pontos_semana: { type: integer }
+        titulo_atual: { type: string }
 
     UsuarioUpdate:
       type: object
@@ -992,7 +1420,10 @@ components:
         email: { type: string }
         senha: { type: string, format: password, description: "Nova senha (será hasheada)" }
         nivel: { type: integer }
-        pontos: { type: integer }
+        xp: { type: integer }
+        pontos_total: { type: integer }
+        pontos_semana: { type: integer }
+        titulo_atual: { type: string }
 
     Missao:
       type: object
@@ -1000,17 +1431,23 @@ components:
         id: { type: integer }
         titulo: { type: string, nullable: true }
         descricao: { type: string, nullable: true }
+        nivel: { type: integer }
+        xp_recompensa: { type: integer }
         pontos_recompensa: { type: integer }
-        nivel_requerido: { type: integer }
-        criado_em: { type: string, format: date-time, nullable: true }
+        progresso_total: { type: integer }
+        url_imagem: { type: string, nullable: true }
+        criada_em: { type: string, format: date-time, nullable: true }
 
     MissaoInput:
       type: object
       properties:
         titulo: { type: string }
         descricao: { type: string }
+        nivel: { type: integer }
+        xp_recompensa: { type: integer }
         pontos_recompensa: { type: integer }
-        nivel_requerido: { type: integer }
+        progresso_total: { type: integer }
+        url_imagem: { type: string }
 
     UsuarioMissao:
       type: object
@@ -1018,8 +1455,9 @@ components:
         id: { type: integer }
         usuario_id: { type: integer }
         missao_id: { type: integer }
+        progresso_atual: { type: integer }
         status: { type: string, description: "ex. pending, completed" }
-        data_conclusao: { type: string, format: date-time, nullable: true }
+        concluida_em: { type: string, format: date-time, nullable: true }
 
     UsuarioMissaoCreate:
       type: object
@@ -1027,29 +1465,35 @@ components:
       properties:
         usuario_id: { type: integer }
         missao_id: { type: integer }
+        progresso_atual: { type: integer }
         status: { type: string }
-        data_conclusao: { type: string, format: date-time }
+        concluida_em: { type: string, format: date-time }
 
     UsuarioMissaoUpdate:
       type: object
       properties:
+        progresso_atual: { type: integer }
         status: { type: string }
-        data_conclusao: { type: string, format: date-time }
+        concluida_em: { type: string, format: date-time }
 
     Doacao:
       type: object
       properties:
         id: { type: integer }
         usuario_id: { type: integer }
+        instituicao_id: { type: integer }
         descricao: { type: string, nullable: true }
+        quantidade: { type: integer }
         data: { type: string, format: date-time, nullable: true }
 
     DoacaoCreate:
       type: object
-      required: [usuario_id]
+      required: [usuario_id, instituicao_id]
       properties:
         usuario_id: { type: integer }
+        instituicao_id: { type: integer }
         descricao: { type: string }
+        quantidade: { type: integer }
         data: { type: string, format: date-time }
 
     Item:
@@ -1059,6 +1503,7 @@ components:
         nome: { type: string, nullable: true }
         descricao: { type: string, nullable: true }
         custo_pontos: { type: integer }
+        url_imagem: { type: string, nullable: true }
 
     ItemInput:
       type: object
@@ -1066,6 +1511,7 @@ components:
         nome: { type: string }
         descricao: { type: string }
         custo_pontos: { type: integer }
+        url_imagem: { type: string }
 
     UsuarioItem:
       type: object
@@ -1073,7 +1519,7 @@ components:
         id: { type: integer }
         usuario_id: { type: integer }
         item_id: { type: integer }
-        data_aquisicao: { type: string, format: date-time, nullable: true }
+        adquirido_em: { type: string, format: date-time, nullable: true }
 
     UsuarioItemCreate:
       type: object
@@ -1081,7 +1527,7 @@ components:
       properties:
         usuario_id: { type: integer }
         item_id: { type: integer }
-        data_aquisicao: { type: string, format: date-time }
+        adquirido_em: { type: string, format: date-time }
 
     Avatar:
       type: object
@@ -1130,3 +1576,87 @@ components:
       properties:
         usuario_id: { type: integer }
         amigo_id: { type: integer }
+
+    Instituicao:
+      type: object
+      properties:
+        id: { type: integer }
+        nome: { type: string }
+        tipo: { type: string, nullable: true }
+        endereco: { type: string, nullable: true }
+        telefone: { type: string, nullable: true }
+
+    InstituicaoInput:
+      type: object
+      required: [nome, tipo, endereco, telefone]
+      properties:
+        nome: { type: string }
+        tipo: { type: string }
+        endereco: { type: string }
+        telefone: { type: string }
+
+    Titulo:
+      type: object
+      properties:
+        id: { type: integer }
+        nome: { type: string }
+        descricao: { type: string, nullable: true }
+        xp_necessario: { type: integer }
+
+    TituloInput:
+      type: object
+      required: [nome, xp_necessario]
+      properties:
+        nome: { type: string }
+        descricao: { type: string }
+        xp_necessario: { type: integer }
+
+    UsuarioTitulo:
+      type: object
+      properties:
+        id: { type: integer }
+        usuario_id: { type: integer }
+        titulo_id: { type: integer }
+        desbloqueado_em: { type: string, format: date-time, nullable: true }
+
+    UsuarioTituloCreate:
+      type: object
+      required: [usuario_id, titulo_id]
+      properties:
+        usuario_id: { type: integer }
+        titulo_id: { type: integer }
+        desbloqueado_em: { type: string, format: date-time }
+
+    Conquista:
+      type: object
+      properties:
+        id: { type: integer }
+        nome: { type: string }
+        descricao: { type: string, nullable: true }
+        url_icone: { type: string, nullable: true }
+        xp_recompensa: { type: integer }
+
+    ConquistaInput:
+      type: object
+      required: [nome, xp_recompensa]
+      properties:
+        nome: { type: string }
+        descricao: { type: string }
+        url_icone: { type: string }
+        xp_recompensa: { type: integer }
+
+    UsuarioConquista:
+      type: object
+      properties:
+        id: { type: integer }
+        usuario_id: { type: integer }
+        conquista_id: { type: integer }
+        desbloqueada_em: { type: string, format: date-time, nullable: true }
+
+    UsuarioConquistaCreate:
+      type: object
+      required: [usuario_id, conquista_id]
+      properties:
+        usuario_id: { type: integer }
+        conquista_id: { type: integer }
+        desbloqueada_em: { type: string, format: date-time }
