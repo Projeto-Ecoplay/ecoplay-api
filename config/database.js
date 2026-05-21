@@ -1,6 +1,7 @@
 const { Sequelize } = require('sequelize');
 
 const databaseUrl = process.env.DATABASE_URL;
+const isTest = process.env.NODE_ENV === 'test';
 
 function useSsl() {
   if (process.env.DATABASE_SSL === 'false') {
@@ -16,6 +17,14 @@ function useSsl() {
 }
 
 function createSequelize() {
+  if (isTest) {
+    return new Sequelize({
+      dialect: 'sqlite',
+      storage: process.env.TEST_DATABASE_STORAGE || ':memory:',
+      logging: process.env.SEQUELIZE_LOGGING === 'true' ? console.log : false,
+    });
+  }
+
   if (!databaseUrl) {
     return null;
   }

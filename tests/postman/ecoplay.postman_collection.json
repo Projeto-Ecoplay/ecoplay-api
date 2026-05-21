@@ -1,0 +1,176 @@
+{
+  "info": {
+    "name": "Ecoplay API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"senha\": \"{{userSenha}}\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 200', () => pm.response.code === 200);",
+              "const json = pm.response.json();",
+              "if (json.token) { pm.environment.set('token', json.token); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/api/usuarios",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Usuario Postman\",\n  \"email\": \"{{userEmail}}\",\n  \"senha\": \"{{userSenha}}\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 201', () => pm.response.code === 201);",
+              "const json = pm.response.json();",
+              "if (json.id) { pm.environment.set('userId', json.id); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios - List",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{baseUrl}}/api/usuarios"
+      }
+    },
+    {
+      "name": "Missoes - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{baseUrl}}/api/missoes",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Missao Postman\",\n  \"descricao\": \"Descricao\",\n  \"nivel\": 1,\n  \"xp_recompensa\": 10,\n  \"pontos_recompensa\": 5,\n  \"progresso_total\": 5\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 201', () => pm.response.code === 201);",
+              "const json = pm.response.json();",
+              "if (json.id) { pm.environment.set('missaoId', json.id); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Itens - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{baseUrl}}/api/itens",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Item Postman\",\n  \"descricao\": \"Descricao\",\n  \"custo_pontos\": 10\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 201', () => pm.response.code === 201);",
+              "const json = pm.response.json();",
+              "if (json.id) { pm.environment.set('itemId', json.id); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Instituicoes - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{baseUrl}}/api/instituicoes",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Instituicao Postman\",\n  \"tipo\": \"ONG\",\n  \"endereco\": \"Rua Verde\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 201', () => pm.response.code === 201);",
+              "const json = pm.response.json();",
+              "if (json.id) { pm.environment.set('instituicaoId', json.id); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Doacoes - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{baseUrl}}/api/doacoes",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario_id\": {{userId}},\n  \"instituicao_id\": {{instituicaoId}},\n  \"descricao\": \"Doacao\",\n  \"quantidade\": 1\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status 201', () => pm.response.code === 201);"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
